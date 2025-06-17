@@ -5,8 +5,8 @@ OmniRegress: A comprehensive Python library for all types of regression analysis
 # Regression added in library
 
 ### 🔵 **Basic Regression Models**  
-- [✅] **Linear Regression** - Models linear relationships.  
-- [✅] **Polynomial Regression** - Fits nonlinear data with polynomial terms.  
+- [✅] **Linear Regression** - Models linear relationships.  ([Usage](docs/Usage/LinearRegression.md))
+- [✅] **Polynomial Regression** - Fits nonlinear data with polynomial terms.  ([Usage](docs/Usage/PolynomialRegression.md))
 - [ ] **Logistic Regression** - Binary classification (technically regression).  
 - [ ] **Ridge Regression (L2)** - Prevents overfitting via L2 penalty.  
 - [ ] **Lasso Regression (L1)** - Performs feature selection via L1 penalty.  
