@@ -4,49 +4,48 @@ from .linear_regression import LinearRegression
 
 class PolynomialRegression:
     """
-    A polynomial regression implementation using linear regression as a base.
+    Polynomial Regression implementation
+
+    Attributes:
+        degree (int): Polynomial degree
+        linear_model (LinearRegression): Underlying linear model
+
+    Example:
+        >>> model = PolynomialRegression(degree=3)
+        >>> model.fit(X_train, y_train)
+        >>> predictions = model.predict(X_test)
     """
 
     def __init__(self, degree=2):
-        """
-        Parameters:
-        degree : int, optional (default=2)
-            The degree of the polynomial
-        """
         self.degree = degree
         self.linear_model = LinearRegression()
 
     def _create_polynomial_features(self, X):
         """
-        Create polynomial features from the input data.
+        Generate polynomial features
 
-        Parameters:
-        X : array-like, shape (n_samples, 1)
-            Input data (must be 1-dimensional)
+        Args:
+            X (ndarray): Input data of shape (n_samples,)
 
         Returns:
-        X_poly : array, shape (n_samples, degree)
-            Polynomial features
+            ndarray: Polynomial features of shape (n_samples, degree)
         """
         X = np.array(X)
         if X.ndim != 1:
-            raise ValueError("X must be 1-dimensional for polynomial regression")
+            raise ValueError("Polynomial regression requires 1D input")
 
-        X_poly = np.column_stack([X ** i for i in range(1, self.degree + 1)])
-        return X_poly
+        return np.column_stack([X ** i for i in range(1, self.degree + 1)])
 
     def fit(self, X, y):
         """
-        Fit the polynomial regression model.
+        Fit polynomial regression model
 
-        Parameters:
-        X : array-like, shape (n_samples, 1)
-            Training data (1-dimensional)
-        y : array-like, shape (n_samples,)
-            Target values
+        Args:
+            X (ndarray): Training data of shape (n_samples,)
+            y (ndarray): Target values of shape (n_samples,)
 
         Returns:
-        self : returns an instance of self.
+            self: Fitted model instance
         """
         X_poly = self._create_polynomial_features(X)
         self.linear_model.fit(X_poly, y)
@@ -54,32 +53,27 @@ class PolynomialRegression:
 
     def predict(self, X):
         """
-        Predict using the polynomial model.
+        Make predictions using fitted model
 
-        Parameters:
-        X : array-like, shape (n_samples, 1)
-            Samples to predict (1-dimensional)
+        Args:
+            X (ndarray): Input data of shape (n_samples,)
 
         Returns:
-        y_pred : array, shape (n_samples,)
-            Predicted values
+            ndarray: Predicted values
         """
         X_poly = self._create_polynomial_features(X)
         return self.linear_model.predict(X_poly)
 
     def score(self, X, y):
         """
-        Calculate the R-squared score.
+        Calculate R² score (coefficient of determination)
 
-        Parameters:
-        X : array-like, shape (n_samples, 1)
-            Test samples (1-dimensional)
-        y : array-like, shape (n_samples,)
-            True values
+        Args:
+            X (ndarray): Test samples
+            y (ndarray): True values
 
         Returns:
-        score : float
-            R-squared score
+            float: R² score
         """
         X_poly = self._create_polynomial_features(X)
         return self.linear_model.score(X_poly, y)

@@ -3,7 +3,16 @@ import numpy as np
 
 class LinearRegression:
     """
-    A simple implementation of linear regression using the normal equation.
+    Linear Regression implementation using normal equation
+
+    Attributes:
+        coefficients (ndarray): Coefficients for each feature
+        intercept (float): Bias term
+
+    Example:
+        >>> model = LinearRegression()
+        >>> model.fit(X_train, y_train)
+        >>> predictions = model.predict(X_test)
     """
 
     def __init__(self):
@@ -12,64 +21,60 @@ class LinearRegression:
 
     def fit(self, X, y):
         """
-        Fit the linear regression model.
+        Fit linear regression model to training data
 
-        Parameters:
-        X : array-like, shape (n_samples, n_features)
-            Training data
-        y : array-like, shape (n_samples,)
-            Target values
+        Args:
+            X (ndarray): Training data of shape (n_samples, n_features)
+            y (ndarray): Target values of shape (n_samples,)
 
         Returns:
-        self : returns an instance of self.
+            self: Fitted model instance
         """
-        # Add a column of ones for the intercept term
         X = np.array(X)
         y = np.array(y)
+
+        # Add bias term
         X = np.c_[np.ones(X.shape[0]), X]
 
-        # Calculate coefficients using the normal equation
-        theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(y)
+        # Normal equation: θ = (XᵀX)⁻¹Xᵀy
+        try:
+            theta = np.linalg.inv(X.T @ X) @ X.T @ y
+        except np.linalg.LinAlgError:
+            # Use pseudoinverse if singular matrix
+            theta = np.linalg.pinv(X.T @ X) @ X.T @ y
 
         self.intercept = theta[0]
         self.coefficients = theta[1:]
-
         return self
 
     def predict(self, X):
         """
-        Predict using the linear model.
+        Make predictions using fitted model
 
-        Parameters:
-        X : array-like, shape (n_samples, n_features)
-            Samples to predict
+        Args:
+            X (ndarray): Input data of shape (n_samples, n_features)
 
         Returns:
-        y_pred : array, shape (n_samples,)
-            Predicted values
+            ndarray: Predicted values
         """
         if self.coefficients is None:
-            raise ValueError("Model not fitted yet. Call 'fit' first.")
+            raise RuntimeError("Model not fitted. Call fit() first")
 
         X = np.array(X)
-        return self.intercept + np.dot(X, self.coefficients)
+        return self.intercept + X @ self.coefficients
 
     def score(self, X, y):
         """
-        Calculate the R-squared score.
+        Calculate R² score (coefficient of determination)
 
-        Parameters:
-        X : array-like, shape (n_samples, n_features)
-            Test samples
-        y : array-like, shape (n_samples,)
-            True values
+        Args:
+            X (ndarray): Test samples
+            y (ndarray): True values
 
         Returns:
-        score : float
-            R-squared score
+            float: R² score
         """
         y_pred = self.predict(X)
-        y_mean = np.mean(y)
-        ss_total = np.sum((y - y_mean) ** 2)
         ss_res = np.sum((y - y_pred) ** 2)
-        return 1 - (ss_res / ss_total)
+        ss_tot = np.sum((y - np.mean(y)) ** 2)
+        return 1 - (ss_res / ss_tot)
