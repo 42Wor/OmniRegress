@@ -1,8 +1,7 @@
-# OmniRegress
-OmniRegress: A comprehensive Python library for all types of regression analysis.
+<h1 align="center">OmniRegress</h1>
+<p align="center"><b>A comprehensive Python library for all types of regression analysis.</b></p>
 
 
-# Regression added in library
 
 ### 🔵 **Basic Regression Models**  
 - [✅] **Linear Regression** - Models linear relationships.  ([Usage](docs/Usage/LinearRegression.md))

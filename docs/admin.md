@@ -10,7 +10,7 @@ Here's a comprehensive `ADMIN.md` file for your `OmniRegress` project that docum
 OmniRegress/
 ├── pyproject.toml        # Build configuration
 ├── README.md            # Project overview
-├── my_regression/       # Core package
+├── omniregress/       # Core package
 │   ├── __init__.py
 │   ├── linear_regression.py
 │   ├── polynomial_regression.py
@@ -58,17 +58,17 @@ python -m pip install --user -e .
 pytest
 
 # Run specific test file
-pytest my_regression/tests/test_linear.py -v
+pytest omniregress/tests/test_linear.py -v
 
 # With coverage report
-pytest --cov=my_regression
+pytest --cov=omniregress
 ```
 
 ### Building Documentation
 ```bash
 # If using Sphinx:
 pip install sphinx
-sphinx-apidoc -o docs/ my_regression/
+sphinx-apidoc -o docs/ omniregress/
 cd docs && make html
 ```
 
@@ -91,4 +91,12 @@ pip freeze > requirements.txt
 # Update all dependencies
 pip install --upgrade -r requirements.txt
 ```
+### Publishing to PyPI
+```bash
+# Build the package
+pip install build
+python -m build
 
+# Upload to PyPI (requires twine)
+pip install twine
+twine upload dist/*### Publishing to PyPI
