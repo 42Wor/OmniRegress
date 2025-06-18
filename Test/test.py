@@ -1,19 +1,21 @@
-from omniregress import LinearRegression, PolynomialRegression
+from omniregress import LinearRegression
 import numpy as np
 
-# Linear regression example
-X_lin = np.array([[1], [2], [3], [4], [5]])
-y_lin = np.array([2, 4, 6, 8, 10])
+X_np = np.array([[1], [2], [3], [4], [5.5]])
+y_np = np.array([2.1, 3.9, 6.1, 7.9, 11.2])
 
-lin_model = LinearRegression()
-lin_model.fit(X_lin, y_lin)
-print("Linear coefficients:", lin_model.coefficients)
-print("Linear intercept:", lin_model.intercept)
+model = LinearRegression()
+model.fit(X_np, y_np)
+print("Coefficients:", model.coefficients)
+print("Intercept:", model.intercept)
+predictions = model.predict(np.array([[6], [7]]))
+print("Predictions:", predictions)
+print("Score:", model.score(X_np, y_np))
 
-# Polynomial regression example
-X_poly = np.array([1, 2, 3, 4, 5])
-y_poly = np.array([1, 4, 9, 16, 25])
-
-poly_model = PolynomialRegression(degree=2)
-poly_model.fit(X_poly, y_poly)
-print("Polynomial predictions:", poly_model.predict(X_poly))
+# Test with Python lists
+X_list = [[1], [2], [3]]
+y_list = [2, 4, 5.9]
+model_list = LinearRegression()
+model_list.fit(X_list, y_list)
+print("\nList Coeffs:", model_list.coefficients)
+print("List Intercept:", model_list.intercept)

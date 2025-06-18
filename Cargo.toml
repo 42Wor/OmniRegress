@@ -1,17 +1,15 @@
 [package]
 name = "omniregress"
-version = "2.0.0"  # Updated to match your query
+version = "2.0.0"
 edition = "2021"
 
 [lib]
-name = "omniregress"
+name = "_omniregress" # Name of the compiled library for Python import
 crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.22", features = ["extension-module"] }
-numpy = "0.22"
-ndarray = "0.15"
-ndarray-linalg = { version = "0.16", features = ["openblas-system"] }  # Use system BLAS
+# numpy dependency is REMOVED
 
 [build-dependencies]
 maturin = "1.7"
