@@ -1,54 +1,42 @@
-# pyproject.toml (Updated)
-
 [build-system]
-# Specifies build tools. setuptools is common.
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
 
 [project]
-# --- Core Metadata ---
-name = "omnirgress" # The name used for pip install (MUST be unique on PyPI)
-version = "1.0.0" # Your current version
+name = "omniregress"
+version = "2.0.0"
 authors = [
-  { name="Maaz.waheed", email="maaz.waheed@mbktechstudio.com" },
-  # Add others if applicable
+    { name = "Maaz.waheed", email = "maaz.waheed@mbktechstudio.com" },
 ]
 description = "OmniRegress: A comprehensive Python library for all types of regression analysis."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MPL-2.0" } # SPDX identifier for Mozilla Public License 2.0
-keywords = ["regression", "machine learning", "statistics", "data analysis", "python", "omni", "omnirgress"]
-    classifiers = [
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Topic :: Scientific/Engineering :: Information Analysis",
-        "Topic :: Scientific/Engineering :: Mathematics",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Operating System :: OS Independent",
-    ]
-# --- Dependencies ---
-# List packages your library *requires* to run
+license = { text = "MPL-2.0" }
+keywords = ["regression", "machine learning", "statistics", "data analysis", "python", "omni", "omniregress"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
 dependencies = [
-    "numpy"
+    "numpy>=1.21",
 ]
 
-# --- Project URLs ---
-# Links displayed on PyPI
 [project.urls]
-Homepage ="https://github.com/42Wor/omniregress"
-Repository ="https://github.com/42Wor/omniregress"
+Homepage = "https://github.com/42Wor/omniregress"
+Repository = "https://github.com/42Wor/omniregress"
 
-# --- Explicit Package Discovery ---
-# ADDED/MODIFIED SECTION: Tells setuptools where to find the package code
-[tool.setuptools.packages.find]
-where = ["."]  # Look in the current directory (where pyproject.toml is)
-include = ["omniregress"] # Include the omniregress packagey
+[tool.maturin]
+module-name = "omniregress._omniregress"
