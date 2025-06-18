@@ -1,7 +1,9 @@
 <h1 align="center">OmniRegress</h1>
 <p align="center"><b>A comprehensive Python library for all types of regression analysis.</b></p>
 
+## Update: 2.1.0
 
+**New:** Linear Regression implemented from scratch in Rust!
 
 ### 🔵 **Basic Regression Models**  
 - [✅] **Linear Regression** - Models linear relationships.  ([Usage](docs/Usage/LinearRegression.md))
