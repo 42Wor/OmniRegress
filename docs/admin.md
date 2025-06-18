@@ -113,27 +113,5 @@ You can install `maturin` using one of the following methods:
 ### Build and Develop Your Rust Extension
 Run the following command to build your Rust extension and make it available for Python:
 ```sh
-maturin develop
+ maturin develop --release
 ```
-Since you're on a system that doesn't use `apt-get`, let's install the dependencies using your system's package manager. Based on the error message, you might be using either Fedora, RHEL, or another RPM-based distribution.
-
-For Fedora/RHEL-based systems:
-```bash
-sudo dnf install cmake gcc-gfortran openblas-devel
-```
-
-For Arch Linux:
-```bash
-sudo pacman -S cmake gcc-fortran openblas
-sudo pacman -S openblas cblas lapack
-```
-
-After installing the dependencies, try building again:
-```bash
-export OPENBLAS_INCLUDE_DIR=/usr/include
-export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
-cargo clean
-maturin develop
-```
-
-If you're using a different Linux distribution, let me know and I can provide the correct package installation command.
