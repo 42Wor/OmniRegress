@@ -73,21 +73,26 @@ pip freeze > requirements.txt
 # Update all dependencies
 pip install --upgrade -r requirements.txt
 ```
+
 ### Publishing to PyPI
 ```bash
 # Build the package
 pip install build
 python -m build
+```
 
+```bash
 # Upload to PyPI (requires twine)
 pip install twine
 twine upload dist/*### Publishing to PyPI
+````
 
+Then, clean your build artifacts just in case:
 
-Then, clean your build artifacts just in case:W
 ```bash
 cargo clean
 ```
+
 And try building again:
 ```bash
 pip install -e .
@@ -115,3 +120,29 @@ Run the following command to build your Rust extension and make it available for
 ```sh
  maturin develop --release
 ```
+
+
+
+
+
+### Building and Publishing Wheels with `maturin`
+
+1. Build the wheel with maturin:
+    ```bash
+    maturin build --release
+    ```
+
+2. (Optional) Create a `wheelhouse` directory if it does not exist:
+    ```bash
+    mkdir -p wheelhouse
+    ```
+
+3. Copy the generated wheel to `wheelhouse` (adjust the filename as needed):
+    ```bash
+    cp target/wheels/omniregress-*.whl wheelhouse/
+    ```
+
+4. Upload the wheel to PyPI:
+    ```bash
+    twine upload wheelhouse/*
+    ```
