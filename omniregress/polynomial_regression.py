@@ -129,9 +129,9 @@ class PolynomialRegression:
     @property
     def coefficients(self):
         """Coefficients of the underlying linear model."""
-        return self.linear_model.coefficients
+        return self.linear_model.coef_
 
     @property
     def intercept(self):
         """Intercept of the underlying linear model."""
-        return self.linear_model.intercept
+        return self.linear_model.intercept_

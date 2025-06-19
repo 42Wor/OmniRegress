@@ -11,8 +11,8 @@ lin_model_single = LinearRegression()
 print("Fitting single-feature linear model...")
 lin_model_single.fit(X_lin_single, y_lin_single)
 
-print("Single-feature Linear coefficients (from property):", lin_model_single.coefficients)
-print("Single-feature Linear intercept (from property):", lin_model_single.intercept)
+print("Single-feature Linear coefficients (from property):", lin_model_single.coef_)
+print("Single-feature Linear intercept (from property):", lin_model_single.intercept_)
 
 lin_predictions_single = lin_model_single.predict(X_lin_single)
 print("Single-feature Linear predictions:", lin_predictions_single)
@@ -37,12 +37,12 @@ lin_model_multi = LinearRegression()
 print("Fitting multi-feature linear model...")
 lin_model_multi.fit(X_multi, y_multi)
 
-print(f"Multi-feature Linear coefficients (expected approx [2, 3]): {lin_model_multi.coefficients}")
-print(f"Multi-feature Linear intercept (expected approx 1.0): {lin_model_multi.intercept}")
+print(f"Multi-feature Linear coefficients (expected approx [2, 3]): {lin_model_multi.coef_}")
+print(f"Multi-feature Linear intercept (expected approx 1.0): {lin_model_multi.intercept_}")
 
 # Check number of coefficients
-if lin_model_multi.coefficients is not None:
-    print(f"Number of coefficients: {len(lin_model_multi.coefficients)} (expected {X_multi.shape[1]})")
+if lin_model_multi.coef_ is not None:
+    print(f"Number of coefficients: {len(lin_model_multi.coef_)} (expected {X_multi.shape[1]})")
 else:
     print("Coefficients are None after multi-feature fit.")
 
@@ -73,12 +73,12 @@ lin_model_zero_feat = LinearRegression()
 print("Fitting zero-feature linear model...")
 lin_model_zero_feat.fit(X_zero_feat, y_zero_feat)
 
-print(f"Zero-feature Linear coefficients (expected empty or None): {lin_model_zero_feat.coefficients}")
-print(f"Zero-feature Linear intercept (expected approx {expected_intercept_zero_feat}): {lin_model_zero_feat.intercept}")
+print(f"Zero-feature Linear coefficients (expected empty or None): {lin_model_zero_feat.coef_}")
+print(f"Zero-feature Linear intercept (expected approx {expected_intercept_zero_feat}): {lin_model_zero_feat.intercept_}")
 
 # Check characteristics of zero-feature model
-if lin_model_zero_feat.coefficients is not None:
-    print(f"Length of coefficients: {len(lin_model_zero_feat.coefficients)} (expected 0)")
+if lin_model_zero_feat.coef_ is not None:
+    print(f"Length of coefficients: {len(lin_model_zero_feat.coef_)} (expected 0)")
 else:
     print("Coefficients are None for zero-feature model (as expected if it becomes an empty list).")
 
