@@ -10,11 +10,10 @@ The `LinearRegression` class implements ordinary least squares linear regression
 ## Importing
 ```python
 from omniregress import LinearRegression
-import numpy as np  # Import numpy for examples
-````
+import numpy as np  # Required for examples
+```
 
 ## Initialization
-
 ```python
 model = LinearRegression()
 ```
@@ -22,128 +21,116 @@ model = LinearRegression()
 ## Methods
 
 ### `fit(X, y)`
-
 Fits the model to training data.
 
 **Parameters:**
-
-* `X`: Feature data (array-like, shape `(n_samples, n_features)` or `(n_samples,)`). 1D input will be treated as `(n_samples, 1)`.
-* `y`: Target vector (1D array-like, shape `(n_samples,)`)
+- `X`: Feature data (array-like, shape `(n_samples, n_features)` or `(n_samples,)`)
+- `y`: Target vector (1D array-like, shape `(n_samples,)`)
 
 **Returns:**
 Fitted model instance
 
 ### `predict(X)`
-
 Makes predictions using fitted model.
 
 **Parameters:**
-
-* `X`: Input features (array-like, shape `(n_samples, n_features)` or `(n_samples,)`). 1D input will be treated as `(n_samples, 1)`.
+- `X`: Input features (array-like, shape `(n_samples, n_features)` or `(n_samples,)`)
 
 **Returns:**
 Predicted values (1D NumPy array)
 
 ### `score(X, y)`
-
 Calculates R² (coefficient of determination).
 
 **Parameters:**
-
-* `X`: Test features (array-like, processed similarly to `fit`)
-* `y`: True target values (array-like, processed similarly to `fit`)
+- `X`: Test features
+- `y`: True target values
 
 **Returns:**
 R² score (float)
 
 ## Attributes
-
-* `coefficients`: Feature weights (1D NumPy array or `None` if not fitted)
-* `intercept`: Bias term (float or `None` if not fitted)
+- `coef_`: Feature weights (1D NumPy array or `None` if not fitted)
+- `intercept_`: Bias term (float or `None` if not fitted)
 
 ## Complete Example
 
+### Single Feature Example
 ```python
-import numpy as np
-from omniregress import LinearRegression  # Assuming omniregress is in the Python path
-
 # Create sample data where y = 2x + 1
-X_single = np.array([1, 2, 3, 4, 5])
-y_single = np.array([3, 5, 7, 9, 11])
+X = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
+y = np.array([3, 5, 7, 9, 11])
 
 # Initialize and fit model
-model_single = LinearRegression()
-model_single.fit(X_single, y_single)
+model = LinearRegression()
+model.fit(X, y)
 
 # Show parameters
 print("--- Single Feature Example ---")
-print(f"Intercept: {model_single.intercept:.2f}")        # Expected: 1.00
-if model_single.coefficients is not None:
-    print(f"Coefficient: {model_single.coefficients[0]:.2f}")  # Expected: 2.00
-else:
-    print("Coefficients: None (model not fitted or no features)")
+print(f"Intercept: {model.intercept_:.2f}")        # Expected: 1.00
+print(f"Coefficient: {model.coef_[0]:.2f}")       # Expected: 2.00
 
 # Make predictions
-X_test_single = np.array([6, 7])
-predictions_single = model_single.predict(X_test_single)
-print(f"Predictions for {X_test_single.ravel()}: {predictions_single}")  # Expected: [13. 15.]
+X_test = np.array([6, 7]).reshape(-1, 1)
+predictions = model.predict(X_test)
+print(f"Predictions: {predictions}")  # Expected: [13. 15.]
 
 # Calculate score
-r2_single = model_single.score(X_single, y_single)
-print(f"R² score: {r2_single:.4f}")  # Expected: 1.0000
+r2 = model.score(X, y)
+print(f"R² score: {r2:.4f}")  # Expected: 1.0000
 ```
 
-## Handling Multiple Features
-
+### Multiple Features Example
 ```python
-# Multiple regression example
 # Define a model: y = 3 + 1*x₁ + 2*x₂
 X_multi = np.array([
     [1, 1],
     [1, 2],
     [2, 1],
-    [2, 2],
-    [3, 2],
-    [3, 3],
-    [4, 1]
+    [2, 2]
 ])
-y_multi = np.array([
-    6,  # 3 + 1*1 + 2*1
-    8,  # 3 + 1*1 + 2*2
-    7,  # 3 + 1*2 + 2*1
-    9,  # 3 + 1*2 + 2*2
-    10, # 3 + 1*3 + 2*2
-    12, # 3 + 1*3 + 2*3
-    9   # 3 + 1*4 + 2*1
-])
+y_multi = np.array([6, 8, 7, 9])  # 3 + 1*x1 + 2*x2
 
 model_multi = LinearRegression()
 model_multi.fit(X_multi, y_multi)
 
 print("\n--- Multiple Features Example ---")
-print(f"Intercept: {model_multi.intercept:.2f}")  # Expected: 3.00
-if model_multi.coefficients is not None:
-    print(f"Coefficients: {np.round(model_multi.coefficients, 2)}")  # Expected: [1.00 2.00]
-else:
-    print("Coefficients: None")
+print(f"Intercept: {model_multi.intercept_:.2f}")  # Expected: 3.00
+print(f"Coefficients: {np.round(model_multi.coef_, 2)}")  # Expected: [1.00 2.00]
 
-# Predict on new multi-feature data
+# Predict on new data
 X_test_multi = np.array([
     [1, 3],  # 3 + 1*1 + 2*3 = 10
     [4, 2]   # 3 + 1*4 + 2*2 = 11
 ])
 predictions_multi = model_multi.predict(X_test_multi)
-print(f"Predictions for new multi-feature data: {predictions_multi}")  # Expected: [10. 11.]
-
-# Score for multiple features
-r2_multi = model_multi.score(X_multi, y_multi)
-print(f"R² score (multi): {r2_multi:.4f}")  # Expected: 1.0000
+print(f"Predictions: {predictions_multi}")  # Expected: [10. 11.]
 ```
 
-## Notes
+## Key Notes
 
-* Accepts various array-like inputs (e.g., NumPy arrays, Python lists). Prediction results and coefficients are returned as NumPy arrays.
-* The underlying Rust implementation uses direct matrix inversion (Gauss-Jordan elimination) via the normal equation. This method may fail or produce inaccurate results for singular or numerically ill-conditioned matrices (i.e., when features are perfectly collinear or nearly so).
-* For very large datasets (e.g., >10,000 samples or many features), the normal equation approach can be computationally intensive due to matrix multiplication and inversion. Consider alternative implementations like those based on gradient descent for such scenarios.
-* The Python wrapper handles conversion of 1D array-like inputs for `X` into 2D, and ensures data passed to the Rust core is in the expected `list[list[float]]` or `list[float]` format.
+1. **Input Handling**:
+   - Automatically converts 1D inputs to 2D column vectors
+   - Accepts both NumPy arrays and Python lists
 
+2. **Performance Characteristics**:
+   - Uses normal equation (matrix inversion)
+   - Best for small-to-medium datasets (<10,000 samples)
+   - May be slow for very large feature sets
+
+3. **Numerical Stability**:
+   - Includes partial pivoting in matrix inversion
+   - Will raise errors for singular matrices
+
+4. **Scikit-learn Compatibility**:
+   - Uses `coef_` and `intercept_` naming convention
+   - Similar method signatures
+
+## Troubleshooting
+
+**Common Errors:**
+- `ValueError: Matrix dimensions mismatch`: Check that X and y have same number of samples
+- `ValueError: Matrix is singular`: Features may be perfectly correlated
+- `AttributeError`: Use `coef_` and `intercept_` (with underscore) not `coefficients`/`intercept`
+
+For large datasets, consider preprocessing with feature scaling or using gradient descent-based implementations.
