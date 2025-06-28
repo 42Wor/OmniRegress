@@ -1,32 +1,24 @@
 import numpy as np
-
 try:
-    from ._omniregress import RustLinearRegression as _RustLinearRegressionInternal
-
+ from ._omniregress import RustLogisticRegression as _RustLogisticRegressionInternal
 except ImportError as e:
     raise ImportError(
         "Could not import Rust backend. Please install the compiled package."
     ) from e
-class LinearRegression:
-    """Linear Regression with Rust backend."""
+class LogisticRegression:
+    """
+    Logistic Regression implementation with Rust backend.
+    """
 
-    def __init__(self):
-        self._rust_model = _RustLinearRegressionInternal()
-        self._is_fitted = False
-
-    @property
-    def coefficients(self):
-        """Coefficients of the features in the decision function."""
-        if not self._is_fitted:
-            return None
-        return np.array(self._rust_model.coefficients or [])
-
-    @property
-    def intercept(self):
-        """Independent term in the linear model."""
-        if not self._is_fitted:
-            return None
-        return self._rust_model.intercept or 0.0
+    def __init__(self, learning_rate=0.01, max_iter=1000, tol=1e-4):
+        self.learning_rate = learning_rate
+        self.max_iter = max_iter
+        self.tol = tol
+        self._rust_model = _RustLogisticRegressionInternal(
+            learning_rate=learning_rate,
+            max_iter=max_iter,
+            tol=tol
+        )
 
     def _ensure_2d_array(self, X):
         """Convert input to 2D list of floats."""
@@ -49,7 +41,9 @@ class LinearRegression:
         raise TypeError("y must be numpy array or list")
 
     def fit(self, X, y):
-        """Fit linear model."""
+        """
+        Fit logistic regression model.
+        """
         X_processed = self._ensure_2d_array(X)
         y_processed = self._ensure_1d_array(y)
 
@@ -57,22 +51,28 @@ class LinearRegression:
             raise ValueError("X and y must have same number of samples")
 
         self._rust_model.fit(X_processed, y_processed)
-        self._is_fitted = True
         return self
 
-    def predict(self, X):
-        """Make predictions."""
-        if not self._is_fitted:
-            raise RuntimeError("Model not fitted")
-
+    def predict_proba(self, X):
+        """
+        Predict probability estimates.
+        """
         X_processed = self._ensure_2d_array(X)
-        return np.array(self._rust_model.predict(X_processed))
+        return np.array(self._rust_model.predict_proba(X_processed))
 
-    def score(self, X, y):
-        """Return R² score."""
-        y_pred = self.predict(X)
-        y_true = np.array(self._ensure_1d_array(y))
+    def predict(self, X, threshold=0.5):
+        """
+        Predict class labels.
+        """
+        X_processed = self._ensure_2d_array(X)
+        return np.array(self._rust_model.predict(X_processed, threshold))
 
-        u = ((y_true - y_pred) ** 2).sum()
-        v = ((y_true - y_true.mean()) ** 2).sum()
-        return 1.0 - u / v if v != 0 else 1.0
+    @property
+    def coefficients(self):
+        """Coefficients of the features in the decision function."""
+        return np.array(self._rust_model.coefficients or [])
+
+    @property
+    def intercept(self):
+        """Independent term in the linear model."""
+        return self._rust_model.intercept or 0.0

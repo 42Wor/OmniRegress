@@ -1,60 +1,13 @@
 # omniregress/polynomial_regression.py
 import numpy as np
-# Assuming LinearRegression is correctly imported from the Rust extension
-# via omniregress.linear_regression or omniregress.__init__
-from .linear_regression import LinearRegression
-
+from ._omniregress import RustPolynomialRegression as _RustPolynomialRegression
 
 class PolynomialRegression:
-    """
-    Polynomial Regression implementation
-
-    Attributes:
-        degree (int): Polynomial degree
-        linear_model (LinearRegression): Underlying linear model
-
-    Example:
-        >>> import numpy as np
-        >>> model = PolynomialRegression(degree=3)
-        >>> X_train = np.array([1, 2, 3, 4], dtype=np.float64)
-        >>> y_train = np.array([1, 8, 27, 64], dtype=np.float64)
-        >>> model.fit(X_train, y_train)
-        >>> X_test = np.array([5, 6], dtype=np.float64)
-        >>> predictions = model.predict(X_test)
-    """
-
     def __init__(self, degree=2):
         if not isinstance(degree, int) or degree < 1:
             raise ValueError("Degree must be a positive integer.")
         self.degree = degree
-        self.linear_model = LinearRegression()
-
-    def _create_polynomial_features(self, X):
-        """
-        Generate polynomial features
-
-        Args:
-            X (ndarray): Input data of shape (n_samples,) or (n_samples, 1)
-
-        Returns:
-            ndarray: Polynomial features of shape (n_samples, degree), dtype=np.float64
-        """
-        # Ensure X is a numpy array and convert to float64 for Rust compatibility
-        X_arr = np.array(X, dtype=np.float64)
-
-        if X_arr.ndim == 2 and X_arr.shape[1] == 1:
-            X_arr = X_arr.ravel()  # Convert column vector to 1D array
-        elif X_arr.ndim != 1:
-            raise ValueError(
-                "Input X for PolynomialRegression must be a 1D array or a 2D column vector."
-            )
-
-        if X_arr.size == 0:  # Handle empty input array
-            return np.empty((0, self.degree), dtype=np.float64)
-
-        # Create polynomial features. X_arr is already float64.
-        features = [X_arr ** i for i in range(1, self.degree + 1)]
-        return np.column_stack(features)
+        self._rust_model = _RustPolynomialRegression(degree)
 
     def fit(self, X, y):
         """
@@ -67,17 +20,22 @@ class PolynomialRegression:
         Returns:
             self: Fitted model instance
         """
-        X_poly = self._create_polynomial_features(X)
-
-        # Ensure y is a numpy array and convert to float64 for Rust compatibility
+        # Ensure X is a numpy array and convert to float64 for Rust compatibility
+        X_arr = np.array(X, dtype=np.float64)
         y_arr = np.array(y, dtype=np.float64)
+
+        if X_arr.ndim != 1:
+            raise ValueError("Input X for PolynomialRegression must be a 1D array.")
+
         if y_arr.ndim != 1:
             raise ValueError("Target y must be a 1D array.")
-        if X_poly.shape[0] != y_arr.shape[0] and X_poly.size > 0:  # Allow empty fit if X_poly is empty
-            raise ValueError(
-                f"Shape mismatch: X_poly has {X_poly.shape[0]} samples and y has {y_arr.shape[0]} samples.")
 
-        self.linear_model.fit(X_poly, y_arr)
+        if X_arr.shape[0] != y_arr.shape[0]:
+            raise ValueError(
+                f"Shape mismatch: X has {X_arr.shape[0]} samples and y has {y_arr.shape[0]} samples."
+            )
+
+        self._rust_model.fit(X_arr.tolist(), y_arr.tolist())
         return self
 
     def predict(self, X):
@@ -90,10 +48,12 @@ class PolynomialRegression:
         Returns:
             ndarray: Predicted values
         """
-        X_poly = self._create_polynomial_features(X)
-        if X_poly.size == 0:  # Handle prediction on empty transformed features
-            return np.array([], dtype=np.float64)
-        return self.linear_model.predict(X_poly)
+        X_arr = np.array(X, dtype=np.float64)
+        if X_arr.ndim != 1:
+            raise ValueError("Input X for prediction must be a 1D array.")
+
+        predictions = self._rust_model.predict(X_arr.tolist())
+        return np.array(predictions, dtype=np.float64)
 
     def score(self, X, y):
         """
@@ -106,32 +66,30 @@ class PolynomialRegression:
         Returns:
             float: R² score
         """
-        X_poly = self._create_polynomial_features(X)
-
-        # Ensure y is a numpy array and convert to float64 for Rust compatibility
+        X_arr = np.array(X, dtype=np.float64)
         y_arr = np.array(y, dtype=np.float64)
+
+        if X_arr.ndim != 1:
+            raise ValueError("Input X for scoring must be a 1D array.")
+
         if y_arr.ndim != 1:
             raise ValueError("Target y must be a 1D array.")
-        if X_poly.shape[0] != y_arr.shape[0] and X_poly.size > 0:
+
+        if X_arr.shape[0] != y_arr.shape[0]:
             raise ValueError(
-                f"Shape mismatch: X_poly has {X_poly.shape[0]} samples and y has {y_arr.shape[0]} samples.")
+                f"Shape mismatch: X has {X_arr.shape[0]} samples and y has {y_arr.shape[0]} samples."
+            )
 
-        if X_poly.size == 0 and y_arr.size == 0:  # Score for empty data could be NaN or error, let Rust decide or handle here
-            # Depending on desired behavior, could return 0, NaN, or raise error.
-            # For now, let it pass to Rust, which might error or handle it.
-            # If Rust's score can't handle empty, add: if X_poly.size == 0: return np.nan
-            pass
-        elif X_poly.size == 0 and y_arr.size != 0:  # Mismatch if one is empty and other is not
-            raise ValueError("Cannot score with empty X_poly and non-empty y or vice-versa.")
-
-        return self.linear_model.score(X_poly, y_arr)
+        return self._rust_model.score(X_arr.tolist(), y_arr.tolist())
 
     @property
     def coefficients(self):
-        """Coefficients of the underlying linear model."""
-        return self.linear_model.coef_
+        """Coefficients of the polynomial features (highest degree first)."""
+        coeffs = self._rust_model.coefficients
+        return np.array(coeffs, dtype=np.float64) if coeffs is not None else None
 
     @property
     def intercept(self):
-        """Intercept of the underlying linear model."""
-        return self.linear_model.intercept_
+        """Intercept term of the model."""
+        intercept = self._rust_model.intercept
+        return intercept if intercept is not None else 0.0

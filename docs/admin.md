@@ -23,7 +23,7 @@ python -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install -e .[dev]  # If you have development extras
+pip install .  # If you have development extras
 ```
 
 ### 3. Alternative Setup (System-wide)
@@ -95,11 +95,18 @@ cargo clean
 
 And try building again:
 ```bash
+python -m build
 pip install -e .
 ```
 or
 ```bash
+python -m build
 maturin develop
+```
+or
+```bash
+cargo build --release
+pip install -e .
 ```
 
 ### Install `maturin`
