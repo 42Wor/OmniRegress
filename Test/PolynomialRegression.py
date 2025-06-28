@@ -1,4 +1,4 @@
-import numpy as np
+# import numpy as np
 from omniregress import PolynomialRegression
 
 
@@ -6,8 +6,8 @@ def test_polynomial_regression():
     print("=== Testing Polynomial Regression ===")
 
     # Generate data for y = x² relationship
-    X = np.array([-1.0, -0.5, 0.0, 0.5, 1.0], dtype=np.float64)  # Smaller range for numerical stability
-    y = X * X  # y = x²
+    X = [-1.0, -0.5, 0.0, 0.5, 1.0]  # Smaller range for numerical stability
+    y = [x * x for x in X]  # y = x²
 
     # Initialize and fit model
     model = PolynomialRegression(degree=2)
@@ -18,16 +18,15 @@ def test_polynomial_regression():
     print(f"Intercept: {model.intercept}")
 
     # Test predictions with smaller values first
-    test_X = np.array([1.5, -1.5], dtype=np.float64)
+    test_X = [1.5, -1.5]
     predictions = model.predict(test_X)
-    expected = test_X * test_X
-
+    expected = [x * x for x in test_X]
     print(f"Test X: {test_X}")
     print(f"Predictions: {predictions}")
     print(f"Expected: {expected}")
-    print(f"Absolute Error: {np.abs(predictions - expected)}")
+    print(f"Absolute Error: {[abs(p - e) for p, e in zip(predictions, expected)]}")
 
-    assert np.allclose(predictions, expected, atol=0.1), "Predictions incorrect"
+    assert all(abs(p - e) < 0.1 for p, e in zip(predictions, expected)), "Predictions incorrect"
 
     print("Polynomial Regression Test Passed!\n")
 
