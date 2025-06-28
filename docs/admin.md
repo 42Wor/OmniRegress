@@ -1,45 +1,55 @@
-Here's a comprehensive `ADMIN.md` file for your `OmniRegress` project that documents setup, development, and maintenance procedures:
+# OmniRegress - 🚀 Administration Guide
 
+Welcome to the **OmniRegress** admin manual! This guide covers setup, development, and advanced maintenance for your hybrid Rust/Python project.
 
-# OmniRegress - Administration Guide
+---
 
-
-## Development Setup
+## 🛠️ Development Setup
 
 ### 1. Prerequisites
-- Python 3.12
+
+- Python 3.12+
 - pip
 - virtualenv (recommended)
+- Rust toolchain (`cargo`)
+- maturin (for Rust-Python integration)
 
-### 2. Initial Setup (Arch Linux)
+### 2. Quickstart (Arch Linux)
 
 ```bash
-# Clone repository
+# Clone the repository
 git clone https://github.com/yourusername/OmniRegress.git
 cd OmniRegress
 
-# Create virtual environment
+# Set up Python virtual environment
 python -m venv .venv
 source .venv/bin/activate
 
-# Install dependencies
-pip install .  # If you have development extras
+# Install Python dependencies
+pip install .  # Add `[dev]` if you have development extras
+
+# Install Rust dependencies (if needed)
+cargo build
 ```
 
-### 3. Alternative Setup (System-wide)
+### 3. System-wide Setup (Alternative)
+
 ```bash
-sudo pacman -S python-pip python-venv
+sudo pacman -S python-pip python-venv rust
 python -m pip install --user -e .
 ```
 
-## Development Workflow
+---
+
+## 🚦 Development Workflow
 
 ### Running Tests
+
 ```bash
-# Run all tests
+# Run all Python tests
 pytest
 
-# Run specific test file
+# Run a specific test file
 pytest omniregress/tests/test_linear.py -v
 
 # With coverage report
@@ -47,6 +57,7 @@ pytest --cov=omniregress
 ```
 
 ### Building Documentation
+
 ```bash
 # If using Sphinx:
 pip install sphinx
@@ -54,102 +65,132 @@ sphinx-apidoc -o docs/ omniregress/
 cd docs && make html
 ```
 
-## Maintenance Tasks
+---
+
+## 🧹 Maintenance Tasks
 
 ### Version Management
-1. Update version in `pyproject.toml`
-2. Create git tag:
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
+
+1. Update the version in `pyproject.toml`
+2. Tag and push:
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
 
 ### Dependency Management
+
 ```bash
-# Add new dependency
+# Add a new dependency
 pip install package
 pip freeze > requirements.txt
 
-# Update all dependencies
+# Upgrade all dependencies
 pip install --upgrade -r requirements.txt
 ```
 
-### Publishing to PyPI
+---
+
+## 🚀 Publishing
+
+### Build & Publish to PyPI
+
 ```bash
 # Build the package
 pip install build
 python -m build
-```
 
-```bash
 # Upload to PyPI (requires twine)
 pip install twine
-twine upload dist/*### Publishing to PyPI
-````
+twine upload dist/*
+```
 
-Then, clean your build artifacts just in case:
+---
+
+## 🦀 Rust-Python Integration
+
+### Clean & Rebuild
 
 ```bash
 cargo clean
-```
-
-And try building again:
-```bash
 python -m build
 pip install -e .
 ```
+
 or
+
 ```bash
 python -m build
 maturin develop
 ```
+
 or
+
 ```bash
 cargo build --release
 pip install -e .
 ```
 
+---
+
 ### Install `maturin`
-You can install `maturin` using one of the following methods:
 
-- Using `pacman` (Arch Linux):
-    ```sh
-    sudo pacman -S maturin
-    ```
+- **Arch Linux:**
+  ```sh
+  sudo pacman -S maturin
+  ```
+- **pip:**
+  ```sh
+  pip install maturin
+  ```
 
-- Using `pip` (Python package manager):
-    ```sh
-    pip install maturin
-    ```
+---
 
-### Build and Develop Your Rust Extension
-Run the following command to build your Rust extension and make it available for Python:
+### Build & Develop Rust Extension
+
 ```sh
- maturin develop --release
+maturin develop --release
 ```
 
+---
 
+### Build & Publish Wheels with `maturin`
 
+1. Build the wheel:
+   ```bash
+   maturin build --release
+   ```
+2. (Optional) Create a `wheelhouse`:
+   ```bash
+   mkdir -p wheelhouse
+   ```
+3. Copy the wheel:
+   ```bash
+   cp target/wheels/omniregress-*.whl wheelhouse/
+   ```
+4. Upload to PyPI:
+   ```bash
+   twine upload wheelhouse/*
+   ```
 
+---
 
-### Building and Publishing Wheels with `maturin`
+## 🐳 Building Manylinux Wheels with Docker
 
-1. Build the wheel with maturin:
-    ```bash
-    maturin build --release
-    ```
+1. **Install Docker:**
+   ```bash
+   sudo pacman -S docker
+   sudo systemctl start docker
+   sudo systemctl enable docker
+   sudo usermod -aG docker $USER
+   newgrp docker
+   ```
+2. **Build inside manylinux container:**
+   ```bash
+   docker run --rm -v $(pwd):/io -w /io quay.io/pypa/manylinux2014_x86_64 \
+     /bin/bash -c "source /etc/profile.d/maturin.sh && maturin build --release -o dist"
+   ```
 
-2. (Optional) Create a `wheelhouse` directory if it does not exist:
-    ```bash
-    mkdir -p wheelhouse
-    ```
+---
 
-3. Copy the generated wheel to `wheelhouse` (adjust the filename as needed):
-    ```bash
-    cp target/wheels/omniregress-*.whl wheelhouse/
-    ```
-
-4. Upload the wheel to PyPI:
-    ```bash
-    twine upload wheelhouse/*
-    ```
+✨ **Happy hacking!** ✨

@@ -9,7 +9,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.22", features = ["extension-module"] }
-# numpy dependency is REMOVED
 
-[build-dependencies]
-maturin = "1.7"
+
