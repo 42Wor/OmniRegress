@@ -186,11 +186,10 @@ maturin develop --release
    newgrp docker
    ```
 2. **Build inside manylinux container:**
-   ```bash
-   docker run --rm -v $(pwd):/io -w /io quay.io/pypa/manylinux2014_x86_64 \
-     /bin/bash -c "source /etc/profile.d/maturin.sh && maturin build --release -o dist"
-   ```
-
+```bash
+sudo docker run --rm -v $(pwd):/io -w /io quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "yum install -y gcc && curl https://sh.rustup.rs -sSf | sh -s -- -y && export PATH=/root/.cargo/bin:$PATH && /opt/python/cp312-cp312/bin/python -m pip install maturin && /opt/python/cp312-cp312/bin/maturin build --release --out dist -i /opt/python/cp312-cp312/bin/python"
+```
+sudo systemctl stop docker
 ---
 
 ✨ **Happy hacking!** ✨
