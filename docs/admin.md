@@ -130,7 +130,10 @@ or
 cargo build --release
 pip install -e .
 ```
-
+or
+```bash
+maturin develop --release
+```
 ---
 
 ### Install `maturin`

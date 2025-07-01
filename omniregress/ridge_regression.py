@@ -1,18 +1,24 @@
-#linear_regression.py
+# ridge_regression.py
 import numpy as np
 
 try:
-    from ._omniregress import RustLinearRegression as _RustLinearRegressionInternal
-
+    from ._omniregress import RustRidgeRegression as _RustRidgeRegressionInternal
 except ImportError as e:
     raise ImportError(
         "Could not import Rust backend. Please install the compiled package."
     ) from e
-class LinearRegression:
-    """Linear Regression with Rust backend."""
 
-    def __init__(self):
-        self._rust_model = _RustLinearRegressionInternal()
+class RidgeRegression:
+    """Ridge Regression with Rust backend."""
+
+    def __init__(self, alpha=1.0):
+        """
+        Parameters:
+        -----------
+        alpha : float, default=1.0
+            Regularization strength; must be a positive float
+        """
+        self._rust_model = _RustRidgeRegressionInternal(alpha)
         self._is_fitted = False
 
     @property
@@ -28,6 +34,18 @@ class LinearRegression:
         if not self._is_fitted:
             return None
         return self._rust_model.intercept or 0.0
+
+    @property
+    def alpha(self):
+        """Regularization strength."""
+        return self._rust_model.alpha
+
+    @alpha.setter
+    def alpha(self, value):
+        """Set regularization strength."""
+        if value <= 0:
+            raise ValueError("alpha must be positive")
+        self._rust_model.alpha = value
 
     def _ensure_2d_array(self, X):
         """Convert input to 2D list of floats."""
@@ -50,7 +68,7 @@ class LinearRegression:
         raise TypeError("y must be numpy array or list")
 
     def fit(self, X, y):
-        """Fit linear model."""
+        """Fit ridge regression model."""
         X_processed = self._ensure_2d_array(X)
         y_processed = self._ensure_1d_array(y)
 

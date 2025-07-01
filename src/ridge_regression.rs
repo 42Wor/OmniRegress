@@ -1,4 +1,4 @@
-// linear_regression.rs
+// ridge_regression.rs
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 use pyo3::PyResult;
@@ -6,18 +6,22 @@ use pyo3::PyResult;
 use crate::matrix;
 
 #[pyclass]
-pub struct RustLinearRegression {
+pub struct RustRidgeRegression {
     coefficients: Option<Vec<f64>>,
     intercept: Option<f64>,
+    alpha: f64,
 }
 
+
 #[pymethods]
-impl RustLinearRegression {
+impl RustRidgeRegression {
     #[new]
-    pub fn new() -> Self {
+    #[pyo3(signature = (alpha = 1.0))]
+    pub fn new(alpha: f64) -> Self {
         Self {
             coefficients: None,
             intercept: None,
+            alpha,
         }
     }
 
@@ -44,9 +48,17 @@ impl RustLinearRegression {
             })
             .collect();
 
+        let n_features = x_b[0].len();
         let x_t = matrix::transpose(&x_b);
         let xtx = matrix::matmul(&x_t, &x_b)?;
-        let xtx_inv = matrix::invert(&xtx)?;
+
+        // Add L2 regularization (ridge)
+        let mut xtx_reg = xtx.clone();
+        for i in 1..n_features {  // Skip intercept (first column)
+            xtx_reg[i][i] += self.alpha;
+        }
+
+        let xtx_inv = matrix::invert(&xtx_reg)?;
 
         // Convert y to column vector format
         let y_col: Vec<Vec<f64>> = y.iter().map(|&val| vec![val]).collect();
@@ -89,5 +101,15 @@ impl RustLinearRegression {
     #[getter]
     pub fn intercept(&self) -> Option<f64> {
         self.intercept
+    }
+
+    #[getter]
+    pub fn alpha(&self) -> f64 {
+        self.alpha
+    }
+
+    #[setter]
+    pub fn set_alpha(&mut self, alpha: f64) {
+        self.alpha = alpha;
     }
 }
