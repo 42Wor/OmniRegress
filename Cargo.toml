@@ -4,10 +4,10 @@ version = "4.0.0"
 edition = "2021"
 
 [lib]
-name = "_omniregress" # Name of the compiled library for Python import
-crate-type = ["cdylib"]
+name = "omniregress"  # Base name for the Python module
+crate-type = ["cdylib"]  # Dynamic library for Python
 
 [dependencies]
 pyo3 = { version = "0.22", features = ["extension-module"] }
-
-
+ndarray = "0.15"
+numpy = "0.22"
