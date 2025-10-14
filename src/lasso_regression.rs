@@ -1,12 +1,10 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 use pyo3::PyResult;
-use ndarray::{Array1, Axis};
-use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArray2, IntoPyArray};
 
 #[pyclass]
 pub struct RustLassoRegression {
-    coefficients: Option<Array1<f64>>,
+    coefficients: Option<Vec<f64>>,
     intercept: Option<f64>,
     alpha: f64,
     max_iter: usize,
@@ -16,7 +14,7 @@ pub struct RustLassoRegression {
 #[pymethods]
 impl RustLassoRegression {
     #[new]
-    #[pyo3(signature = (alpha=1.0, max_iter=1000, tol=1e-4))]
+    #[pyo3(signature = (alpha = 1.0, max_iter = 1000, tol = 1e-4))]
     pub fn new(alpha: f64, max_iter: usize, tol: f64) -> Self {
         Self {
             coefficients: None,
@@ -27,79 +25,113 @@ impl RustLassoRegression {
         }
     }
 
-    pub fn fit(
-        &mut self,
-        _py: Python<'_>,
-        x: PyReadonlyArray2<f64>,
-        y: PyReadonlyArray1<f64>,
-    ) -> PyResult<()> {
-        let x_arr = x.as_array();
-        let y_arr = y.as_array();
-
-        if x_arr.is_empty() || y_arr.is_empty() {
+    pub fn fit(&mut self, x: Vec<Vec<f64>>, y: Vec<f64>) -> PyResult<()> {
+        if x.is_empty() || y.is_empty() {
             return Err(PyValueError::new_err("Empty input"));
         }
 
-        if x_arr.shape()[0] != y_arr.shape()[0] {
+        if x.len() != y.len() {
             return Err(PyValueError::new_err(format!(
                 "X and y must have same length ({} vs {})",
-                x_arr.shape()[0],
-                y_arr.shape()[0]
+                x.len(),
+                y.len()
             )));
         }
 
-        let n_samples = x_arr.shape()[0] as f64;
-        let n_features = x_arr.shape()[1];
+        let n_samples = x.len();
+        let n_features = if n_samples > 0 { x[0].len() } else { 0 };
 
-        // Center data
-        let x_mean = x_arr.mean_axis(Axis(0)).unwrap();
-        let y_mean = y_arr.mean().unwrap();
+        // Center the data for Lasso (we'll handle intercept separately)
+        let y_mean = y.iter().sum::<f64>() / n_samples as f64;
+        let y_centered: Vec<f64> = y.iter().map(|&val| val - y_mean).collect();
 
-        let x_centered = &x_arr - &x_mean.broadcast(x_arr.raw_dim()).unwrap();
-        let y_centered = &y_arr - y_mean;
+        // Center and scale X
+        let mut x_centered = vec![vec![0.0; n_features]; n_samples];
+        let mut x_std = vec![0.0; n_features];
+        
+        for j in 0..n_features {
+            let col_mean: f64 = x.iter().map(|row| row[j]).sum::<f64>() / n_samples as f64;
+            let col_std: f64 = (x.iter().map(|row| (row[j] - col_mean).powi(2)).sum::<f64>() / n_samples as f64).sqrt();
+            
+            x_std[j] = if col_std > 1e-12 { col_std } else { 1.0 };
+            
+            for i in 0..n_samples {
+                x_centered[i][j] = (x[i][j] - col_mean) / x_std[j];
+            }
+        }
 
-        let mut coef = Array1::zeros(n_features);
-        let intercept = y_mean;
+        // Initialize coefficients to zero
+        let mut coef = vec![0.0; n_features];
         let mut prev_coef = coef.clone();
 
-        for _ in 0..self.max_iter {
+        // Coordinate descent algorithm for Lasso
+        for iter in 0..self.max_iter {
             for j in 0..n_features {
-                // Calculate residual without j-th feature
-                let mut r_j = y_centered.to_owned();
-                for k in 0..n_features {
-                    if k != j && coef[k] != 0.0 {
-                        let xk = x_centered.column(k).to_owned();
-                        r_j = r_j - &(coef[k] * &xk);
+                // Compute residual without feature j
+                let mut r_j = vec![0.0; n_samples];
+                for i in 0..n_samples {
+                    r_j[i] = y_centered[i];
+                    for k in 0..n_features {
+                        if k != j {
+                            r_j[i] -= x_centered[i][k] * coef[k];
+                        }
                     }
                 }
 
-                let x_j = x_centered.column(j).to_owned();
-                let temp = x_j.dot(&r_j);
-                let rho_j = temp / n_samples;
+                // Compute ρ_j = X_j^T * r_j
+                let rho_j: f64 = (0..n_samples)
+                    .map(|i| x_centered[i][j] * r_j[i])
+                    .sum();
 
-                let denom = x_j.dot(&x_j) / n_samples;
-                if rho_j > self.alpha {
-                    coef[j] = (rho_j - self.alpha) / denom;
-                } else if rho_j < -self.alpha {
-                    coef[j] = (rho_j + self.alpha) / denom;
+                // Update coefficient using soft thresholding
+                if rho_j < -self.alpha {
+                    coef[j] = (rho_j + self.alpha) / n_samples as f64;
+                } else if rho_j > self.alpha {
+                    coef[j] = (rho_j - self.alpha) / n_samples as f64;
                 } else {
                     coef[j] = 0.0;
                 }
             }
 
-            let coef_diff = (&coef - &prev_coef).mapv(f64::abs).sum();
-            if coef_diff < self.tol {
+            // Check convergence
+            let max_change = coef.iter()
+                .zip(&prev_coef)
+                .map(|(&a, &b)| (a - b).abs())
+                .fold(0.0f64, f64::max);
+
+            if max_change < self.tol {
                 break;
             }
+
             prev_coef = coef.clone();
+
+            if iter == self.max_iter - 1 {
+                println!("Lasso regression did not converge after {} iterations", self.max_iter);
+            }
         }
 
-        self.coefficients = Some(coef);
+        // Rescale coefficients back to original scale
+        let mut rescaled_coef = vec![0.0; n_features];
+        for j in 0..n_features {
+            rescaled_coef[j] = coef[j] / x_std[j];
+        }
+
+        // Compute intercept
+        let mut x_mean = vec![0.0; n_features];
+        for j in 0..n_features {
+            x_mean[j] = x.iter().map(|row| row[j]).sum::<f64>() / n_samples as f64;
+        }
+
+        let intercept = y_mean - (0..n_features)
+            .map(|j| x_mean[j] * rescaled_coef[j])
+            .sum::<f64>();
+
+        self.coefficients = Some(rescaled_coef);
         self.intercept = Some(intercept);
         Ok(())
     }
 
-    pub fn predict(&self, py: Python<'_>, x: PyReadonlyArray2<f64>) -> PyResult<Py<PyArray1<f64>>> {
+    pub fn predict(&self, x: Vec<Vec<f64>>) -> PyResult<Vec<f64>> {
         let intercept = self
             .intercept
             .ok_or(PyValueError::new_err("Model not fitted"))?;
@@ -108,25 +140,22 @@ impl RustLassoRegression {
             .as_ref()
             .ok_or(PyValueError::new_err("Model not fitted"))?;
 
-        let x_arr = x.as_array();
-        if x_arr.shape()[1] != coef.len() {
+        if !x.is_empty() && x[0].len() != coef.len() {
             return Err(PyValueError::new_err(format!(
                 "Input features don't match model coefficients ({} vs {})",
-                x_arr.shape()[1],
+                x[0].len(),
                 coef.len()
             )));
         }
 
-        let y_pred = x_arr.dot(coef) + intercept;
-        Ok(y_pred.into_pyarray_bound(py).into())
+        Ok(x.iter()
+            .map(|row| intercept + row.iter().zip(coef).map(|(x, w)| x * w).sum::<f64>())
+            .collect())
     }
 
     #[getter]
-    pub fn coefficients(&self, py: Python<'_>) -> PyResult<Py<PyArray1<f64>>> {
-        match &self.coefficients {
-            Some(coef) => Ok(coef.clone().into_pyarray_bound(py).into()),
-            None => Err(PyValueError::new_err("Model not fitted")),
-        }
+    pub fn coefficients(&self) -> Option<Vec<f64>> {
+        self.coefficients.clone()
     }
 
     #[getter]

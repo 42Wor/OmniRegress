@@ -25,6 +25,11 @@ cd OmniRegress
 python -m venv .venv
 source .venv/bin/activate
 
+# windows
+python -m venv .venv
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+D:/OmniRegress/.venv/Scripts/Activate.ps1
+
 # Install Python dependencies
 pip install .  # Add `[dev]` if you have development extras
 
@@ -176,23 +181,3 @@ maturin develop --release
    twine upload wheelhouse/*
    ```
 
----
-
-## 🐳 Building Manylinux Wheels with Docker
-
-1. **Install Docker:**
-   ```bash
-   sudo pacman -S docker
-   sudo systemctl start docker
-   sudo systemctl enable docker
-   sudo usermod -aG docker $USER
-   newgrp docker
-   ```
-2. **Build inside manylinux container:**
-```bash
-sudo docker run --rm -v $(pwd):/io -w /io quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "yum install -y gcc && curl https://sh.rustup.rs -sSf | sh -s -- -y && export PATH=/root/.cargo/bin:$PATH && /opt/python/cp312-cp312/bin/python -m pip install maturin && /opt/python/cp312-cp312/bin/maturin build --release --out dist -i /opt/python/cp312-cp312/bin/python"
-```
-sudo systemctl stop docker
----
-
-✨ **Happy hacking!** ✨
