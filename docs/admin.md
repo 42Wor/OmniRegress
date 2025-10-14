@@ -166,7 +166,11 @@ maturin develop --release
 
 1. Build the wheel:
    ```bash
-   maturin build --release
+   pip install build
+
+   python -m build
+
+
    ```
 2. (Optional) Create a `wheelhouse`:
    ```bash
@@ -174,7 +178,11 @@ maturin develop --release
    ```
 3. Copy the wheel:
    ```bash
-   cp target/wheels/omniregress-*.whl wheelhouse/
+   mkdir -Force wheelhouse
+   #cp target/wheels/omniregress-*.whl wheelhouse/
+   cp dist/omniregress-*.tar.gz wheelhouse/
+   cd dist/omniregress-*.whl wheelhouse/
+
    ```
 4. Upload to PyPI:
    ```bash

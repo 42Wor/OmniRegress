@@ -126,6 +126,18 @@ print(f"Sparsity: {model.sparsity_ratio():.1%}")
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from omniregress import LassoRegression
+
+# Generate sample data
+np.random.seed(42)
+X = np.random.randn(100, 10)  # 100 samples, 10 features
+# Only 4 features are actually relevant
+true_coef = np.array([1.5, -2.0, 0, 0, 3.0, 0, 0, 0, -1.0, 0])
+y = X @ true_coef + np.random.normal(0, 0.5, 100)
+
+print(f"Data shape: X {X.shape}, y {y.shape}")
+print(f"True non-zero coefficients at indices: {np.where(true_coef != 0)[0]}")
 
 # Test different alpha values
 alphas = [0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0]
@@ -148,25 +160,55 @@ for alpha in alphas:
 plt.figure(figsize=(12, 4))
 
 plt.subplot(1, 2, 1)
-plt.semilogx(alphas, non_zero_counts, 'bo-')
-plt.xlabel('Alpha')
+plt.semilogx(alphas, non_zero_counts, 'bo-', linewidth=2, markersize=8)
+plt.xlabel('Alpha (Regularization Strength)')
 plt.ylabel('Number of Non-zero Features')
 plt.title('Feature Selection vs Regularization')
+plt.grid(True, alpha=0.3)
 
 plt.subplot(1, 2, 2)
-plt.semilogx(alphas, scores, 'ro-')
-plt.xlabel('Alpha')
+plt.semilogx(alphas, scores, 'ro-', linewidth=2, markersize=8)
+plt.xlabel('Alpha (Regularization Strength)')
 plt.ylabel('R² Score')
 plt.title('Performance vs Regularization')
+plt.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+
+# Show final model details for alpha=0.1 (usually a good default)
+print("\n" + "="*50)
+print("Detailed analysis for alpha=0.1:")
+model = LassoRegression(alpha=0.1)
+model.fit(X, y)
+
+indices, values = model.get_nonzero_coefficients()
+print(f"Selected features: {indices}")
+print(f"Coefficient values: {np.round(values, 3)}")
+print(f"True coefficients: {true_coef[indices]}")
+print(f"Sparsity ratio: {model.sparsity_ratio():.1%}")
+print(f"R² score: {model.score(X, y):.3f}")
 ```
 
 ### Example 3: Comparison with Ridge Regression
 
 ```python
-from omniregress import RidgeRegression
+import numpy as np
+from omniregress import LassoRegression, RidgeRegression
+
+# Generate sample data with some irrelevant features
+np.random.seed(42)
+X = np.random.randn(100, 5)  # 100 samples, 5 features
+
+# Only 3 features are actually relevant
+true_coef = np.array([1.5, -2.0, 3.0, 0, 0])
+y = X @ true_coef + np.random.normal(0, 0.3, 100)
+
+print("Dataset Info:")
+print(f"X shape: {X.shape}")
+print(f"True relevant features: {np.where(true_coef != 0)[0]}")
+print(f"True coefficients: {true_coef[true_coef != 0]}")
+print()
 
 # Compare Lasso vs Ridge
 lasso_model = LassoRegression(alpha=0.5)
@@ -185,6 +227,22 @@ print(f"Non-zero features: {len(ridge_model.coefficients)}")
 
 print(f"\nLasso R²:  {lasso_model.score(X, y):.3f}")
 print(f"Ridge R²: {ridge_model.score(X, y):.3f}")
+
+# Additional comparison details
+print("\n" + "="*50)
+print("FEATURE SELECTION COMPARISON")
+print("="*50)
+
+lasso_indices, lasso_values = lasso_model.get_nonzero_coefficients()
+print("Lasso selected features:", lasso_indices)
+print("Lasso coefficient values:", np.round(lasso_values, 3))
+
+print(f"\nLasso sparsity ratio: {lasso_model.sparsity_ratio():.1%}")
+print(f"Features eliminated by Lasso: {X.shape[1] - len(lasso_indices)}/{X.shape[1]}")
+
+# Show which features Lasso correctly identified
+correct_selections = sum(1 for idx in lasso_indices if true_coef[idx] != 0)
+print(f"Correctly identified relevant features: {correct_selections}/{sum(true_coef != 0)}")
 ```
 
 ## 💡 Key Notes
