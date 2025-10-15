@@ -26,6 +26,9 @@ cd OmniRegress
 python3 -m venv .venv_Ubuntu
 source .venv_Ubuntu/bin/activate
 
+# ArchLinux
+python3 -m venv .venv_ArchLinux
+source .venv_ArchLinux/bin/activate
 # windows
 python -m venv .venv
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -41,7 +44,7 @@ cargo build
 ### 3. System-wide Setup (Alternative)
 
 ```bash
-sudo pacman -S python-pip python-venv rust
+sudo pacman -S python-pip rust
 python -m pip install --user -e .
 ```
 ```bash
@@ -186,7 +189,7 @@ maturin develop --release
    mkdir -Force wheelhouse
    #cp target/wheels/omniregress-*.whl wheelhouse/
 
-   
+
    cp dist/omniregress-*.tar.gz wheelhouse/
 
    #.venv

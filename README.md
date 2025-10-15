@@ -6,10 +6,8 @@ OmniRegress: A comprehensive Python & Rust library for all types of regression a
 ## 🚀 Update: 4.0.0 Release!
 
 ✨ **Brand New:**  
-- 🦀 **Linear Regression** — Now blazing fast, implemented from scratch in Rust!  
-- 🦀 **Polynomial Regression** — Pure Rust power for nonlinear fits!  
-- 🦀 **Logistic Regression** — Native Rust implementation for robust binary classification!
-- 🦀 **Ridge Regression (L2)** — Rust implementation with L2 regularization to reduce overfitting.
+- 🦀 **Ridge Regression (L2)** — Rust implementation with L2 regularization to reduce overfitting and handle multicollinearity
+- 🦀 **Lasso Regression (L1)** — Rust implementation with L1 regularization for automatic feature selection and sparse solutions
 
 ### 🔵 **Basic Regression Models**  
 - [✅] **Linear Regression** — Fast, pure Rust core. ([Usage 🚀](docs/Usage/LinearRegression.md))
