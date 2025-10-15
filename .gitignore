@@ -3,9 +3,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# my additions
+
+Cargo.lock
+.venv_Ubuntu
+
+
+
 # C extensions
 *.so
-Cargo.lock
 # Distribution / packaging
 .Python
 build/

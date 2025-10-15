@@ -22,8 +22,9 @@ git clone https://github.com/yourusername/OmniRegress.git
 cd OmniRegress
 
 # Set up Python virtual environment
-python -m venv .venv
-source .venv/bin/activate
+
+python3 -m venv .venv_Ubuntu
+source .venv_Ubuntu/bin/activate
 
 # windows
 python -m venv .venv
@@ -43,7 +44,13 @@ cargo build
 sudo pacman -S python-pip python-venv rust
 python -m pip install --user -e .
 ```
-
+```bash
+sudo apt update
+sudo apt install build-essential
+gcc --version
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustc --version
+```
 ---
 
 ## 🚦 Development Workflow
@@ -169,8 +176,6 @@ maturin develop --release
    pip install build
 
    python -m build
-
-
    ```
 2. (Optional) Create a `wheelhouse`:
    ```bash
@@ -180,8 +185,16 @@ maturin develop --release
    ```bash
    mkdir -Force wheelhouse
    #cp target/wheels/omniregress-*.whl wheelhouse/
+
+   
    cp dist/omniregress-*.tar.gz wheelhouse/
-   cd dist/omniregress-*.whl wheelhouse/
+
+   #.venv
+   Move-Item -Path dist/omniregress-*.whl -Destination wheelhouse/
+
+   #.venv_Ubuntu
+   mv dist/omniregress-*.whl wheelhouse/
+
 
    ```
 4. Upload to PyPI:
