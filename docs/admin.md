@@ -20,20 +20,26 @@ Welcome to the **OmniRegress** admin manual! This guide covers setup, developmen
 # Clone the repository
 git clone https://github.com/yourusername/OmniRegress.git
 cd OmniRegress
+```
 
+```bash
 # Set up Python virtual environment
 
 python3 -m venv .venv_Ubuntu
 source .venv_Ubuntu/bin/activate
-
+```
+```bash
 # ArchLinux
 python3 -m venv .venv_ArchLinux
 source .venv_ArchLinux/bin/activate
+```
+```bash
 # windows
 python -m venv .venv
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 D:/OmniRegress/.venv/Scripts/Activate.ps1
-
+```
+```bash
 # Install Python dependencies
 pip install .  # Add `[dev]` if you have development extras
 

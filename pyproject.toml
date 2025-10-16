@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "omniregress"
 version = "4.0.0"
 authors = [
-    { name = "Maaz.waheed", email = "maaz.waheed@mbktechstudio.com" },
+    { name = "Maaz.waheed", email = "wwork4287@gmail.com" },
 ]
 description = "OmniRegress: A comprehensive Python library for all types of regression analysis."
 readme = "README.md"
