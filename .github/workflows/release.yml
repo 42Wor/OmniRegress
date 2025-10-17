@@ -7,14 +7,9 @@ on:
     tags:
       - 'v*'
 
-# Add permissions for OIDC
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   build-and-publish:
-    name: Build and publish to PyPI
+    name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
     
     steps:
@@ -25,4 +20,5 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: publish
-          # No token needed for trusted publishing
+          # Use the secret token for PyPI authentication
+          tokens: ${{ secrets.PYPI_API_TOKEN }}
