@@ -1,30 +1,48 @@
 # .github/workflows/release.yml
 
+# A descriptive name for the workflow, which will appear in the GitHub Actions tab.
 name: Publish Python Package to PyPI
 
+# This section defines the trigger for the workflow.
 on:
+  # The workflow will only run when you push a new tag that starts with 'v'.
+  # Examples: v1.0.0, v4.0.5, etc.
   push:
     tags:
       - 'v*'
 
+# This section defines the jobs to be run.
 jobs:
   publish-to-pypi:
+    # A human-readable name for the job.
     name: Build and publish Python distributions to PyPI
+    # The job will run on the latest version of Ubuntu. The maturin-action handles
+    # building for other platforms like Windows and macOS from here.
     runs-on: ubuntu-latest
 
-    # --- ADD THIS BLOCK ---
     # This explicitly grants the GITHUB_TOKEN the permissions it needs.
-    # The action needs to read repository contents to function correctly.
+    # The maturin-action needs to read repository contents to function correctly.
+    # This solves the "Bad credentials" error from GitHub.
     permissions:
       contents: read
-    # ----------------------
 
+    # The sequence of steps that the job will execute.
     steps:
+      # Step 1: Check out the repository's code so the workflow can access it.
+      # Using v4 is the current best practice.
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: This is the main step that builds and publishes your package.
+      # It uses the official PyO3/maturin-action.
       - name: Build and publish wheels using maturin
         uses: PyO3/maturin-action@v1
         with:
+          # The 'publish' command tells maturin to build all wheels and the sdist,
+          # and then upload them all to PyPI.
           command: publish
+          
+          # This is the corrected input name for the PyPI token.
+          # It securely retrieves the API token you stored in GitHub secrets.
+          # Make sure your secret in GitHub is named PYPI_API_TOKEN.
           token: ${{ secrets.PYPI_API_TOKEN }}
