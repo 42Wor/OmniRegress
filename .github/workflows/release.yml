@@ -1,41 +1,30 @@
 # .github/workflows/release.yml
 
-# A descriptive name for the workflow, which will appear in the GitHub Actions tab.
 name: Publish Python Package to PyPI
 
-# This section defines the trigger for the workflow.
 on:
-  # The workflow will only run when you push a new tag that starts with 'v'.
-  # Examples: v1.0.0, v4.0.2, v5.1.3-alpha
   push:
     tags:
       - 'v*'
 
-# This section defines the jobs to be run.
 jobs:
-  # We define a single job named 'publish-to-pypi'.
   publish-to-pypi:
-    # A human-readable name for the job.
     name: Build and publish Python distributions to PyPI
-    # The job will run on the latest version of Ubuntu.
-    # The maturin-action handles building for other platforms like Windows and macOS.
     runs-on: ubuntu-latest
 
-    # The sequence of steps that the job will execute.
+    # --- ADD THIS BLOCK ---
+    # This explicitly grants the GITHUB_TOKEN the permissions it needs.
+    # The action needs to read repository contents to function correctly.
+    permissions:
+      contents: read
+    # ----------------------
+
     steps:
-      # Step 1: Check out the repository's code so the workflow can access it.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: This is the main step that builds and publishes your package.
-      # It uses the official PyO3/maturin-action.
       - name: Build and publish wheels using maturin
         uses: PyO3/maturin-action@v1
         with:
-          # The 'publish' command tells maturin to build all wheels and the sdist,
-          # and then upload them all to PyPI.
           command: publish
-          
-          # This is the corrected input for the PyPI token.
-          # It securely retrieves the API token you stored in GitHub secrets.
           token: ${{ secrets.PYPI_API_TOKEN }}
