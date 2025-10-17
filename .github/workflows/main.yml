@@ -1,0 +1,31 @@
+# .github/workflows/release.yml
+
+name: Publish to PyPI
+
+# This workflow runs when you create a new tag that starts with 'v'
+# For example: v4.0.0, v4.0.1, etc.
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-publish:
+    name: Build and publish Python distributions to PyPI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # This is the core step. It uses maturin-action to build wheels
+      # for all target platforms: Linux, Windows, and macOS.
+      # It will also build the source distribution (sdist).
+      - name: Build and publish wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          # The 'publish' command tells maturin to build and then upload to PyPI
+          command: publish
+          # This is the secret token for PyPI authentication
+          # You need to configure this in your GitHub repository settings
+          pypi-token: ${{ secrets.PYPI_API_TOKEN }}
