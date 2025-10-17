@@ -16,15 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build wheels with maturin
+      - name: Build and publish wheels
         uses: PyO3/maturin-action@v1
         with:
-          command: build
-          args: --release --strip
-          manylinux: auto
-
-      - name: Publish to PyPI with Twine
-        uses: pypa/gh-action-pypi-publish@release
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: target/wheels/
+          command: publish
+          # Use the secret token for PyPI authentication
+          tokens: ${{ secrets.PYPI_API_TOKEN }}
