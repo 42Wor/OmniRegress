@@ -1,0 +1,89 @@
+# .github/workflows/build-wheels.yml
+
+name: Build and Publish Wheels
+
+# When this workflow is triggered
+on:
+  # Run on pushes to the main branch
+  push:
+    branches: [ "main" ]
+  # Run on pull requests targeting the main branch
+  pull_request:
+    branches: [ "main" ]
+  # Allow manual triggering from the GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # We want to see the results of all builds, even if one fails
+      fail-fast: false
+      matrix:
+        # Define the operating systems to build on
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # This is the core step that uses the maturin-action to build wheels.
+      # It automatically handles setting up Rust, Python, and building for
+      # all the required architectures.
+      #
+      # - On Linux: Builds manylinux wheels for x86_64 and aarch64 inside a container.
+      # - On macOS: Builds universal2 wheels for x86_64 and arm64 (Apple Silicon).
+      # - On Windows: Builds wheels for x86_64.
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          # The command to run. 'build' creates the wheels.
+          command: build
+          # Arguments passed to maturin.
+          # --release: Build optimized artifacts.
+          # --out: Specify the output directory.
+          args: --release --out dist
+
+      # Upload the built wheels as a workflow artifact.
+      # This allows the 'publish' job to download them later.
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          # Name the artifact based on the OS to keep them separate
+          name: wheels-${{ matrix.os }}
+          # The path to the directory containing the wheels
+          path: dist
+
+  publish_to_pypi:
+    name: Publish to PyPI
+    # This job should only run after all 'build_wheels' jobs have completed successfully
+    needs: [build_wheels]
+    # IMPORTANT: This job only runs when you push a tag that starts with 'v' (e.g., v4.0.0, v4.0.1)
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+
+    runs-on: ubuntu-latest
+
+    # Configure permissions for OIDC (trusted publishing)
+    # This is more secure than using a long-lived API token
+    permissions:
+      id-token: write # This is required for trusted publishing
+
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          # The pattern matches all artifacts starting with 'wheels-'
+          pattern: wheels-*
+          # The destination directory for downloaded artifacts
+          path: dist
+          # Merge all downloaded artifacts into a single directory structure
+          merge-multiple: true
+
+      - name: List files in dist
+        run: ls -R dist
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No 'with' block is needed if you use trusted publishing.
+        # The action will automatically use the OIDC token.
