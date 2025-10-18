@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "omniregress"
-version = "4.0.1"
+version = "4.1.0"
 authors = [
     { name = "Maaz.waheed", email = "wwork4287@gmail.com" },
 ]
